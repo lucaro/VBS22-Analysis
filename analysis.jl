@@ -65,7 +65,7 @@ score_sum_normalized = @rorderby score_sum_normalized findfirst(==(:team), oder)
 
 pos = collect(Iterators.flatten(([[i, i, i] for i in 1:16])))
 grp = collect(Iterators.flatten(([[1, 2, 3] for i in 1:16])))
-names = unique(score_sum_normalized[:, :team])
+team_names = unique(score_sum_normalized[:, :team])
 
 colors = palette("Set1", 3)
 
@@ -74,7 +74,7 @@ fig = Figure()
 ax = Axis(fig[1, 1],
 xlabel = "Team",
 ylabel = "Score",
-xticks = (1:16, names),
+xticks = (1:16, team_names),
 yticks = 0:50:300,
 xticklabelrotation = pi/4,
 title = "")
@@ -93,7 +93,12 @@ save("score_sum.pdf", fig)
 
 ## correct/wrong submissions per team
 
-submissions_per_team = combine(groupby(submissions, [:team, :group, :status]), :status => length => :count)
+#count only one correct submission for KIS tasks
+submissions_per_team_task = combine(groupby(submissions, [:team, :group, :status, :task]), :status => length => :count)
+duplicates = (submissions_per_team_task[:, :group] .!== "AVS") .& (submissions_per_team_task[:, :status] .== "CORRECT") .& (submissions_per_team_task[:, :count] .> 1)
+submissions_per_team_task[duplicates, :count] = repeat([1], sum(duplicates))
+
+submissions_per_team = combine(groupby(submissions_per_team_task, [:team, :group, :status]), :count => sum => :count)
 sort!(submissions_per_team, [:group, :status])
 submissions_per_team = @rorderby submissions_per_team findfirst(==(:team), oder)
 
@@ -126,7 +131,7 @@ fig = Figure()
 ax = Axis(fig[1, 1],
 xlabel = "Team",
 ylabel = "Number of Submissions",
-xticks = (1:16, names),
+xticks = (1:16, team_names),
 yticks = (0:2:14),
 xticklabelrotation = pi/4,
 title = "")
@@ -170,7 +175,7 @@ fig = Figure()
 ax = Axis(fig[1, 1],
 xlabel = "Team",
 ylabel = "Number of Submissions",
-xticks = (1:16, names),
+xticks = (1:16, team_names),
 yticks = (0:200:2000),
 xticklabelrotation = pi/4,
 title = "")
@@ -218,7 +223,7 @@ fig = Figure()
 ax = Axis(fig[1, 1],
 xlabel = "Team",
 ylabel = "Minutes",
-xticks = (1:16, names),
+xticks = (1:16, team_names),
 yticks = (0:1:8),
 xticklabelrotation = pi/4,
 title = "")
@@ -260,7 +265,7 @@ fig = Figure()
 ax = Axis(fig[1, 1],
 xlabel = "Team",
 ylabel = "Minutes",
-xticks = (1:16, names),
+xticks = (1:16, team_names),
 yticks = (0:1:8),
 xticklabelrotation = pi/4,
 title = "")
