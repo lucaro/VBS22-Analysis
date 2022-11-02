@@ -1,5 +1,4 @@
 using JSON, CSV, DataFrames, DataFramesMeta
-#using Fontconfig, Cairo, Gadfly
 using ColorSchemes, ColorBrewer
 using CairoMakie
 
@@ -54,15 +53,6 @@ oder = sort(combine(groupby(score_sum_normalized, :team), :score_sum => sum => :
 
 score_sum_normalized = @rorderby score_sum_normalized findfirst(==(:team), oder)
 
-#p = plot(score_sum_normalized, y = :score_sum, x = :team, color = :group, Geom.bar(),
-#Scale.color_discrete_manual(palette("Set1", 3)...),
-#Guide.colorkey(title = "Task Type"),
-#Guide.XLabel("Team"),
-#Guide.YLabel("Normalized Score"),
-#Theme(bar_spacing = 1mm));
-
-#draw(PDF("score_sum.pdf", 12cm, 8cm), p)
-
 pos = collect(Iterators.flatten(([[i, i, i] for i in 1:16])))
 grp = collect(Iterators.flatten(([[1, 2, 3] for i in 1:16])))
 team_names = unique(score_sum_normalized[:, :team])
@@ -112,15 +102,6 @@ kis = vcat(kis, DataFrame(team = map(x -> x[1], h), group = "", status = "", cou
 kis = combine(groupby(kis, [:team, :key]), :count => sum => :count)
 kis = @rorderby kis findfirst(==(:team), oder)
 
-#p = plot(kis, y = :count, x = :team, color = :key, Geom.bar(position = :dodge),
-#Scale.color_discrete_manual(palette("Paired", 4)...),
-#Guide.colorkey(title = "Task Type - Status"),
-#Guide.XLabel("Team"),
-#Guide.YLabel("Number of Submissions              ", orientation=:vertical),
-#Theme(bar_spacing = 0mm, key_position = :bottom));
-
-#draw(PDF("kis_status_count.pdf", 12cm, 8cm), p)
-
 
 pos = collect(Iterators.flatten(([[i, i, i, i] for i in 1:16])))
 grp = collect(Iterators.flatten(([[1, 2, 3, 4] for i in 1:16])))
@@ -157,14 +138,6 @@ avs = vcat(avs, DataFrame(team = map(x -> x[1], h), group = "AVS", status = map(
 avs = combine(groupby(avs, [:team, :status]), :count => sum => :count)
 avs = @rorderby avs findfirst(==(:team), oder)
 
-#p = plot(avs, y = :count, x = :team, color = :status, Geom.bar(position = :dodge),
-#Scale.color_discrete_manual(palette("Set2", 4)...),
-#Guide.colorkey(title = "Status"),
-#Guide.XLabel("Team"),
-#Guide.YLabel("Number of Submissions              ", orientation=:vertical),
-#Theme(bar_spacing = -1mm, key_position = :bottom));
-
-#draw(PDF("avs_status_count.pdf", 12cm, 8cm), p)
 
 pos = collect(Iterators.flatten(([[i, i, i] for i in 1:16])))
 grp = collect(Iterators.flatten(([[1, 2, 3] for i in 1:16])))
@@ -200,15 +173,6 @@ time_to_first_submission[!, :first] ./= 60_000
 
 time_to_first_submission = @rorderby time_to_first_submission findfirst(==(:team), oder)
 
-#p = plot(time_to_first_submission, y = :first, x = :team, color = :group, Geom.boxplot(),
-#Scale.color_discrete_manual(palette("Set1", 3)...),
-#Guide.colorkey(title = "Task Type"),
-#Guide.XLabel("Team"),
-#Guide.YLabel("Minutes"),
-#Theme(key_position = :bottom));
-
-#draw(PDF("time_to_first_submission.pdf", 12cm, 8cm), p)
-
 
 colors = palette("Set1", 3)
 
@@ -234,7 +198,7 @@ color = colors[dodge],
 gap = 0.4
 )
 
-labels = keys(type_to_id) |> collect
+labels = ["AVS", "KIS-T", "KIS-V"]
 
 Legend(fig[2,1], [PolyElement(polycolor = colors[i]) for i in 1:3], labels, "Task Type", orientation = :horizontal, framevisible = false)
 
@@ -247,15 +211,6 @@ time_to_first_correct_submission = combine(groupby(submissions[submissions[:, :s
 time_to_first_correct_submission[!, :first] ./= 60_000
 
 time_to_first_correct_submission = @rorderby time_to_first_correct_submission findfirst(==(:team), oder)
-
-#p = plot(time_to_first_correct_submission, y = :first, x = :team, color = :group, Geom.boxplot(),
-#Scale.color_discrete_manual(palette("Set1", 3)...),
-#Guide.colorkey(title = "Task Type"),
-#Guide.XLabel("Team"),
-#Guide.YLabel("Minutes"),
-#Theme(key_position = :bottom));
-
-#draw(PDF("time_to_first_correct_submission.pdf", 12cm, 8cm), p)
 
 xs = map(x -> get(team_to_id, x, 0), time_to_first_correct_submission[:, :team])
 dodge = map(x -> get(type_to_id, x, 0), time_to_first_correct_submission[:, :group])
@@ -276,7 +231,7 @@ color = colors[dodge],
 gap = 0.4
 )
 
-labels = keys(type_to_id) |> collect
+labels = ["AVS", "KIS-T", "KIS-V"]
 
 Legend(fig[2,1], [PolyElement(polycolor = colors[i]) for i in 1:3], labels, "Task Type", orientation = :horizontal, framevisible = false)
 
